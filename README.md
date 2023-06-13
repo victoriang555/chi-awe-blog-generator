@@ -9,6 +9,11 @@ A AI hackathon project to generate blog posts for the Chicago Asian Women Empowe
 make init
 ```
 # Run the project
+Run the example project using the following command
+```
+make run-example
+```
+
 Run the project using the following command
 ```
 make run

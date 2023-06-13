@@ -12,3 +12,8 @@ run:
 	@echo
 	@echo --- Run ---
 	python3 main.py
+
+run-example:
+	@echo
+	@echo --- Run Example ---
+	python3 example.py
