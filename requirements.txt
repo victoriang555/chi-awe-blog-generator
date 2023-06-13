@@ -2,3 +2,5 @@ langchain
 python-dotenv
 chromadb
 pypdf
+streamlit
+openai

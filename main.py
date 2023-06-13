@@ -12,157 +12,31 @@ from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 
-template = "Tell me a {adjective} joke about {content}."
+import streamlit as st
+from langchain.llms import OpenAI
+from langchain import PromptTemplate
 
-# Constructor
-constructor_prompt = PromptTemplate(
-    input_variables=["adjective", "content"],
-    template=template,
-)
+# Streamlit is the host for this app
+# The following code is based on this example https://blog.streamlit.io/langchain-tutorial-2-build-a-blog-outline-generator-app-in-25-lines-of-code/ 
+st.set_page_config(page_title ="Chi-AWE Blog Post Generator App")
+st.title('Chi-AWE Blog Post Generator App')
+openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
 
-# Output
-print(f"Constructor: \
-      {constructor_prompt.format(adjective='funny', content='chickens')}")
+def generate_response(topic):
+  llm = OpenAI(model_name='text-curie-001', openai_api_key=openai_api_key)
+  # Prompt
+  template = 'As a AAPI woman interested in empowering other women and making friends in Chicagoland, generate a blog for a blog about {topic}.'
+  prompt = PromptTemplate(input_variables=['topic'], template=template)
+  prompt_query = prompt.format(topic=topic)
+  # Run LLM model and print out response
+  response = llm(prompt_query)
+  return st.info(response)
 
-
-examples = [
-    {"word": "happy", "antonym": "sad"},
-    {"word": "tall", "antonym": "short"},
-    {"word": "energetic", "antonym": "lethargic"},
-    {"word": "sunny", "antonym": "gloomy"},
-    {"word": "windy", "antonym": "calm"},
-]
-
-example_formatter_template = """Word: {word}
-Antonym: {antonym}
-"""
-
-# Every example will be formatted using this prompt template
-example_prompt = PromptTemplate(
-    input_variables=["word", "antonym"],
-    template=example_formatter_template,
-)
-
-# Optional example selector to narrow down the examples that will be used
-example_selector = LengthBasedExampleSelector(
-    examples=examples,
-    example_prompt=example_prompt,
-    max_length=25, # The num of words and newlines used by the formatter example section of the prompt
-)
-
-############ FEW SHOT LEARNING #########
-# Note that you can only provide example_selector or examples as a field, not both at the same time
-few_shot_prompt = FewShotPromptTemplate(
-    example_selector=example_selector, # optional field
-    # examples=examples,
-    example_prompt=example_prompt,
-    prefix="Give the antonym of every input\n", # This gives the command
-    suffix="Word: {input}\nAntonym: ", # Aims to guide the output of the LLM
-    input_variables=["input"],
-    example_separator="\n", # Used to separate the examples from the prefix and the suffix
-)
-
-# Generate a prompt
-print(few_shot_prompt.format(input="big"))
-
-############# OUTPUT PARSERS #############
-class Joke(BaseModel):
-    setup: str = Field(description="question to set up a joke")
-    punchline: str = Field(description="answer to resolve the joke")
-
-parser = PydanticOutputParser(pydantic_object=Joke)
-prompt = PromptTemplate(
-    template="Answer the user query.\n{format_instructions}\n{query}\n",
-    input_variables=["query"],
-    partial_variables={
-        "format_instructions": parser.get_format_instructions()
-    },
-)
-# Ask the LLM to tell us a joke
-joke_query = "Tell me a joke."
-formatted_prompt = prompt.format_prompt(query=joke_query)
-
-# # Send it to OpenAI
-# load_dotenv() 
-# # Note if you're going to use OpenAI, you'll need to supply your API key
-# model = OpenAI(model_name='text-davinci-003', temperature=0.0)
-
-# output = model(formatted_prompt.to_string())
-# parsed_joke = parser.parse(output)
-# print(parsed_joke)
-
-########### LOAD TEXT #############
-loader = PyPDFLoader("example_data/layout-parser-paper.pdf")
-pages = loader.load_and_split()
-
-# Note - without a text splitter, it'll probably be too many tokens to handle.
-print(f"Number of pages: {len(pages)}")
-print(f"First document content: {pages[0]}")
-
-with open("example_data/state_of_the_union.txt") as f:
-    state_of_the_union = f.read()
-
-########### SPLITTING THE TEXT INTO CHUNKS #########
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=100,
-    chunk_overlap=20
-)
-
-texts = text_splitter.create_documents(state_of_the_union)
-
-print(f"\nFirst chunk: {texts[0]}\n")
-print(f"Second chunk: {texts[1]}\n")
-
-########### VECTORSTORES ##############
-embeddings = OpenAIEmbeddings()
-docsearch = Chroma.from_texts(texts, embeddings)
-
-query = "What did the president say about Ketanji Brown Jackson"
-docs = docsearch.similarity_search(query)
-
-########### CHAINING #############
-# Use chains to extract a model call to an LLM
-load_dotenv()
-
-llm = OpenAI(temperature=0.9)
-prompt = PromptTemplate(
-    input_variables=["company", "product"],
-    template="What is a good name for {company} that makes {product}?",
-)
-
-chain = LLMChain(llm=llm, prompt=prompt)
-print(chain.run({"company": "ABC Startup", "product": "colorful socks"}))
-
-########## STATEFUL CHAINING USING MEMORY #######
-load_dotenv()
-
-chat = ChatOpenAI(temperature=0.9)
-conversation = ConversationChain(
-    llm=chat,
-    memory=ConversationBufferMemory()
-)
-
-# Get it to respond partially to a question
-out1 = conversation.run("Answer briefly. \
-                        What are the first 3 colors of a rainbow?")
-# To complete its answer
-out2 = conversation.run("And the next 4?")
-
-########## Chaining Chains #############
-llm = OpenAI(temperature=0.9)
-first_prompt = PromptTemplate(
-    input_variables=["product"],
-    template="What is a good name for a company that makes {product}?"
-)
-chain_one = LLMChain(llm=llm, prompt=first_prompt)
-
-second_prompt = PromptTemplate(
-    input_variables=["company_name"],
-    template="Write a catchphrase \
-        for the following company: {company_name}",
-)
-
-chain_two = LLMChain(llm=llm, prompt=second_prompt)
-
-overall_chain = SimpleSequentialChain(chains=[chain_one, chain_two],
-                                      verbose=True)
+with st.form('myform'):
+  topic = st.text_input('Enter keyword:', '')
+  submitted = st.form_submit_button('Submit')
+  # Smoke test for whether the user is providing a valid OpenAi API Key
+  if not openai_api_key.startswith('sk-'):
+    st.warning('Please enter your OpenAI API key!', icon='⚠')
+  if submitted and openai_api_key.startswith('sk-'):
+    generate_response(topic)
