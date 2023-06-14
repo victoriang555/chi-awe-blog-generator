@@ -31,8 +31,8 @@ class ResponseBodyGenerator:
             input_variables=[constants.PERSON, constants.TOPIC],
             template=constants.OPENING_PARAGRAPH_TEMPLATE
             )
-       prompt_query = opening_paragraph_prompt.format(person=self.person, topic=self.topic)
-       opening_paragraph_chain = LLMChain(llm=self.llm, prompt=prompt_query)
+    #    prompt_query = opening_paragraph_prompt.format(person=self.person, topic=self.topic)
+       opening_paragraph_chain = LLMChain(llm=self.llm, prompt=opening_paragraph_prompt)
        return opening_paragraph_chain
 
     def second_paragraph_chain(self):
@@ -41,8 +41,8 @@ class ResponseBodyGenerator:
             input_variables=[constants.PERSON, constants.TOPIC],
             template=constants.SECOND_PARAGRAPH_TEMPLATE
             )
-       prompt_query = second_paragraph_prompt.format(person=self.person, topic=self.topic)
-       second_paragraph_chain = LLMChain(llm=self.llm, prompt=prompt_query)
+    #    prompt_query = second_paragraph_prompt.format(person=self.person, topic=self.topic)
+       second_paragraph_chain = LLMChain(llm=self.llm, prompt=second_paragraph_prompt)
        return second_paragraph_chain
     
     def generate(self):
@@ -51,4 +51,4 @@ class ResponseBodyGenerator:
        """Chain together all of the paragraph chains"""
        overall_chain = SimpleSequentialChain(chains=[opening_paragraph_chain, second_paragraph_chain],
                                              verbose=True)
-       return overall_chain.run(self.topic)
+       return overall_chain.run()
