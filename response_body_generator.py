@@ -51,7 +51,7 @@ class ResponseBodyGenerator:
        """Chain together all of the paragraph chains"""
        overall_chain = SequentialChain(
           chains=[opening_paragraph_chain, second_paragraph_chain],
-          input_variables=[constants.PERSON, constants.topic],
+          input_variables=[constants.PERSON, constants.TOPIC],
           output_variables=["synopsis", "pitch"],
           verbose=True)
        return overall_chain({"person": self.person, "topic": self.topic})
