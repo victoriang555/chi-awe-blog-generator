@@ -10,7 +10,7 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
-from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain
+from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain, SequentialChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
@@ -32,7 +32,7 @@ class ResponseBodyGenerator:
             template=constants.OPENING_PARAGRAPH_TEMPLATE
             )
     #    prompt_query = opening_paragraph_prompt.format(person=self.person, topic=self.topic)
-       opening_paragraph_chain = LLMChain(llm=self.llm, prompt=opening_paragraph_prompt)
+       opening_paragraph_chain = LLMChain(llm=self.llm, prompt=opening_paragraph_prompt, output_key="synopsis")
        return opening_paragraph_chain
 
     def second_paragraph_chain(self):
@@ -42,13 +42,16 @@ class ResponseBodyGenerator:
             template=constants.SECOND_PARAGRAPH_TEMPLATE
             )
     #    prompt_query = second_paragraph_prompt.format(person=self.person, topic=self.topic)
-       second_paragraph_chain = LLMChain(llm=self.llm, prompt=second_paragraph_prompt)
+       second_paragraph_chain = LLMChain(llm=self.llm, prompt=second_paragraph_prompt, output_key="pitch")
        return second_paragraph_chain
     
     def generate(self):
        opening_paragraph_chain = self.opening_paragraph_chain()
        second_paragraph_chain = self.second_paragraph_chain()
        """Chain together all of the paragraph chains"""
-       overall_chain = SimpleSequentialChain(chains=[opening_paragraph_chain, second_paragraph_chain],
-                                             verbose=True)
-       return overall_chain.run()
+       overall_chain = SequentialChain(
+          chains=[opening_paragraph_chain, second_paragraph_chain],
+          input_variables=[constants.PERSON, constants.topic],
+          output_variables=["synopsis", "pitch"],
+          verbose=True)
+       return overall_chain({"person": self.person, "topic": self.topic})
