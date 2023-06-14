@@ -1,0 +1,6 @@
+MODEL_NAME='text-curie-001'
+TITLE = 'AAPI Women in {topic} - The Community Service, Sisterhood, and Empowerment'
+TOPIC = 'topic'
+PERSON = 'person'
+OPENING_PARAGRAPH_TEMPLATE = 'As a {person} interested in empowering AAPI women and making friends in Chicago, convince me why {topic} is important.'
+SECOND_PARAGRAPH_TEMPLATE = 'As a {person} who is interested in {topic}, convince me why I should donate.'
