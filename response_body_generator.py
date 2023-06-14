@@ -28,7 +28,7 @@ class ResponseBodyGenerator:
     def opening_paragraph_chain(self):
        """Generate the opening paragraph chain"""
        opening_paragraph_prompt = PromptTemplate(
-            input_variables=[constants.person, constants.topic],
+            input_variables=[constants.PERSON, constants.TOPIC],
             template=constants.OPENING_PARAGRAPH_TEMPLATE
             )
        prompt_query = opening_paragraph_prompt.format(person=self.person, topic=self.topic)
@@ -38,7 +38,7 @@ class ResponseBodyGenerator:
     def second_paragraph_chain(self):
        """Generate the opening paragraph chain"""
        second_paragraph_prompt = PromptTemplate(
-            input_variables=[constants.person, constants.topic],
+            input_variables=[constants.PERSON, constants.TOPIC],
             template=constants.SECOND_PARAGRAPH_TEMPLATE
             )
        prompt_query = second_paragraph_prompt.format(person=self.person, topic=self.topic)
