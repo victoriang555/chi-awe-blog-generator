@@ -4,4 +4,4 @@ chromadb
 pypdf
 streamlit
 openai
-https://pypi.org/project/beautifulsoup4/
+bs4
