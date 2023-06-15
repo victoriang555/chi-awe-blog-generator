@@ -9,7 +9,7 @@ class ScrapeChiAWE:
 
   def get_embedded_hyperlinks(self):
     # make request to the base website
-    respose = requests.get(self.base_url)
+    response = requests.get(self.base_url)
 
     # Create a BeautifulSoup object to parse the HTML content
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -50,3 +50,4 @@ class ScrapeChiAWE:
       scrape_text_dict[(k, url)] = [x.get_text() for x in scrape_class_dict[(k, url)]]
 
     return scrape_text_dict
+  
