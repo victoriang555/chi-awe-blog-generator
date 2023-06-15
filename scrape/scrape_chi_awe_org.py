@@ -4,12 +4,12 @@ from bs4 import BeautifulSoup
 import json
 
 class ScrapeChiAWE:
-  def __init__(self) -> None:
-     self.base_url = 'https://www.chi-awe.org/'
+  def __init__(self, base_url) -> None:
+    self.base_url = base_url
 
   def get_embedded_hyperlinks(self):
     # make request to the base website
-    resposen = requests.get(self.base_url)
+    respose = requests.get(self.base_url)
 
     # Create a BeautifulSoup object to parse the HTML content
     soup = BeautifulSoup(response.content, 'html.parser')
