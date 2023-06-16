@@ -11,7 +11,7 @@ make init
 
 # Run the project on streamlit
 - Streamlit is the host for the app. The repo is registered with the Streamlit Community Group. 
-- The app is located here: https://victoriang555-chi-awe-blog-generator-main-6q4j6b.streamlit.app/ 
+- The app is located here: https://victoriang555-chi-awe-blog-generator-streamlit-app-8chn4s.streamlit.app/
 - You'll need an OpenAI API Key to pass it into the app.
 - Note each query you make counts as tokens that are counted toward your OpenAI billing account.
 
@@ -21,7 +21,7 @@ Run the example project using the following command
 make run-example
 ```
 
-Run the project using the following command
+Run the scrape locally using the following command
 ```
 make run
 ```
