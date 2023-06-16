@@ -8,6 +8,11 @@ init:
 
 # run
 # ======================================================================
+scrape:
+	@echo
+	@echo --- Scrape  ---
+	python3 scrape/scrape.py
+
 run:
 	@echo
 	@echo --- Run ---

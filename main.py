@@ -1,5 +1,6 @@
 import constants
 import response_body_generator
+from scrape.scrape_chi_awe_org import ScrapeChiAWE
 
 from langchain import PromptTemplate, FewShotPromptTemplate 
 from langchain.output_parsers import PydanticOutputParser
@@ -19,7 +20,9 @@ from langchain import PromptTemplate
 
 import streamlit as st
 
-
+"""
+Setup the Streamlit app
+"""
 # Streamlit is the host for this app
 # The following code is based on this example https://blog.streamlit.io/langchain-tutorial-2-build-a-blog-outline-generator-app-in-25-lines-of-code/ 
 st.set_page_config(page_title ="Chi-AWE Blog Post Generator App")
@@ -31,7 +34,7 @@ openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
 #   # Prompt
 #   template = 'As a AAPI woman interested in empowering other women and making friends in Chicagoland, generate a blog post about {topic}.'
 #   prompt = PromptTemplate(input_variables=['person','topic'], template=template)
-#   prompt_query = prompt.format(person=person, topic=topic)
+#   prompt_query = prompt.format(persoUsing a list of a few words, describe what type of person you are, ie: age, ethnicity, gender, occupation=person, topic=topic)
 #   # Run LLM model and print out response
 #   response = llm(prompt_query)
 #   return st.info(response)
