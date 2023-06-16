@@ -1,26 +1,8 @@
 import constants
 import response_body_generator
-from scrape.scrape_chi_awe_org import ScrapeChiAWE
 from main import scrape_all_websites
 
 import os
-import json
-
-from langchain import PromptTemplate, FewShotPromptTemplate 
-from langchain.output_parsers import PydanticOutputParser
-from pydantic import BaseModel, Field
-from langchain.llms import OpenAI
-from dotenv import load_dotenv
-from langchain.prompts.example_selector import LengthBasedExampleSelector
-from langchain.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain
-from langchain.memory import ConversationBufferMemory
-from langchain.chat_models import ChatOpenAI
-from langchain.llms import OpenAI
-from langchain import PromptTemplate
 
 import streamlit as st
 
@@ -57,7 +39,7 @@ with st.form('myform'):
   if not openai_api_key.startswith('sk-'):
     st.warning('Please enter your OpenAI API key!', icon='⚠')
   if scrape_requested:
-     scrape_all_websites()
+    scrape_all_websites()
   if blog_requested and openai_api_key.startswith('sk-'):
     generate_response(openai_api_key, person, topic)
     os.remove(constants.SCRAPED_TEXT_FILENAME)
