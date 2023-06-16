@@ -43,8 +43,16 @@ Setup the Streamlit app
 """
 # Streamlit is the host for this app
 # The following code is based on this example https://blog.streamlit.io/langchain-tutorial-2-build-a-blog-outline-generator-app-in-25-lines-of-code/ 
-st.set_page_config(page_title="Chi-AWE Blog Post Generator App")
-st.title('Chi-AWE Blog Post Generator App')
+st.set_page_config(page_title="Chi-AWE Blog Post Generator App",
+                   page_icon="chart_with_upwards_trend",
+                   layout="wide",
+                   initial_sidebar_state="expanded",
+                   menu_items={
+                      'Get Help': 'https://www.chi-awe.org/contact',
+                      'Report a bug': 'https://www.chi-awe.org/contact',
+                      'About': 'AI Hackathon project for Chi-AWE org'
+                   })
+# st.title('Chi-AWE Blog Post Generator App')
 openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
 
 # def generate_response(person, topic):
