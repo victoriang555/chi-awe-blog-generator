@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+
 class ScrapeChiAWE:
   def __init__(self, base_url) -> None:
     self.base_url = base_url
@@ -50,4 +51,3 @@ class ScrapeChiAWE:
       scrape_text_dict[(k, url)] = [x.get_text() for x in scrape_class_dict[(k, url)]]
 
     return scrape_text_dict
-  
