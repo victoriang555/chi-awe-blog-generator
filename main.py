@@ -44,7 +44,7 @@ def scrape_all_websites():
         next_scrape = scraper.get_content()
         scraped_text_dict.update(next_scrape)
     
-    filename = "website_text.txt"
+    # filename = "website_text.txt"
     with open(constants.SCRAPED_TEXT_FILENAME,'w+') as f:
         f.write(str(scraped_text_dict))
 

@@ -1,0 +1,66 @@
+import constants
+
+from langchain import PromptTemplate, FewShotPromptTemplate 
+from langchain.output_parsers import PydanticOutputParser
+from pydantic import BaseModel, Field
+from langchain.llms import OpenAI
+from dotenv import load_dotenv
+from langchain.prompts.example_selector import LengthBasedExampleSelector
+from langchain.document_loaders import PyPDFLoader
+from langchain.document_loaders.csv_loader import CSVLoader
+from langchain.document_loaders import UnstructuredFileLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain, SequentialChain
+from langchain.chains.summarize import load_summarize_chain
+from langchain.memory import ConversationBufferMemory
+from langchain.chat_models import ChatOpenAI
+from langchain.llms import OpenAI
+from langchain import PromptTemplate
+
+########### LOAD TEXT #############
+def load_text(filepath):
+    loader = UnstructuredFileLoader(filepath)
+    data = loader.load()
+    print(data)
+    # loader = PyPDFLoader("example_data/layout-parser-paper.pdf")
+    # pages = loader.load_and_split()
+
+    # Note - without a text splitter, it'll probably be too many tokens to handle.
+    # print(f"Number of pages: {len(pages)}")
+    # print(f"First document content: {pages[0]}")
+
+    with open(filepath) as f:
+        scraped_text = f.read()
+        return scraped_text
+
+########### SPLITTING THE TEXT INTO CHUNKS #########
+def split_text(scraped_text):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=100,
+        chunk_overlap=20
+    )
+
+    texts = text_splitter.create_documents(scraped_text)
+
+    print(f"\nFirst chunk: {texts[0]}\n")
+    print(f"Second chunk: {texts[1]}\n")
+
+    return texts
+
+########### VECTORSTORES ##############
+def docsearch(texts):
+    embeddings = OpenAIEmbeddings()
+    docsearch = Chroma.from_texts(texts, embeddings)
+
+    query = "What did the president say about Ketanji Brown Jackson"
+    docs = docsearch.similarity_search(query)
+    return docs
+
+########### SUMMARIZE ################
+def summarize(docs):
+    llm = OpenAI(temperature=0)
+    chain = load_summarize_chain(llm, chain_type="map_reduce")
+    # summarized_text = chain.run(docs)
+    return chain
