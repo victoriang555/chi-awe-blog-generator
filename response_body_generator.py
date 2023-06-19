@@ -1,4 +1,5 @@
 import constants
+import prepare_text
 
 from langchain import PromptTemplate, FewShotPromptTemplate 
 from langchain.output_parsers import PydanticOutputParser
@@ -11,6 +12,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain, SequentialChain
+from langchain.chains.summarize import load_summarize_chain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
@@ -45,12 +47,21 @@ class ResponseBodyGenerator:
        second_paragraph_chain = LLMChain(llm=self.llm, prompt=second_paragraph_prompt, output_key="pitch")
        return second_paragraph_chain
     
+    def third_paragraph_chain(self):
+       """Generate the paragraph that summarizes what the org does"""
+       scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT_FILENAME)
+       texts = prepare_text.split_text(scraped_text=scraped_text)
+       docs = prepare_text.docsearch(texts)
+       third_paragraph_chain = prepare_text.docsearch(docs)
+       return third_paragraph_chain
+    
     def generate(self):
        opening_paragraph_chain = self.opening_paragraph_chain()
        second_paragraph_chain = self.second_paragraph_chain()
+       third_paragraph_chain = self.third_paragraph_chain()
        """Chain together all of the paragraph chains"""
        overall_chain = SequentialChain(
-          chains=[opening_paragraph_chain, second_paragraph_chain],
+          chains=[opening_paragraph_chain, second_paragraph_chain, third_paragraph_chain],
           input_variables=[constants.PERSON, constants.TOPIC],
           output_variables=["synopsis", "pitch"],
           verbose=True)
