@@ -21,10 +21,13 @@ from langchain import PromptTemplate
 import streamlit as st
 
 class ResponseBodyGenerator:
-    def __init__(self, openai_api_key, person, topic): 
+    def __init__(self, openai_api_key, person, topic, ask, secondary_ask, initiative): 
         self.openai_api_key = openai_api_key
         self.person = person
         self.topic = topic
+        self.ask = ask
+        self.secondary_ask = secondary_ask
+        self.initiative = initiative
         self.llm = OpenAI(model_name=constants.MODEL_NAME, openai_api_key=openai_api_key)
     
     def opening_paragraph_chain(self):
@@ -33,36 +36,60 @@ class ResponseBodyGenerator:
             input_variables=[constants.PERSON, constants.TOPIC],
             template=constants.OPENING_PARAGRAPH_TEMPLATE
             )
-    #    prompt_query = opening_paragraph_prompt.format(person=self.person, topic=self.topic)
        opening_paragraph_chain = LLMChain(llm=self.llm, prompt=opening_paragraph_prompt, output_key="synopsis")
        return opening_paragraph_chain
 
-    def second_paragraph_chain(self):
-       """Generate the opening paragraph chain"""
-       second_paragraph_prompt = PromptTemplate(
+    def pitch_paragraph_chain(self):
+       """Generate the paragraph making a pitch about supporting non-profits"""
+       pitch_paragraph_prompt = PromptTemplate(
             input_variables=[constants.PERSON, constants.TOPIC],
-            template=constants.SECOND_PARAGRAPH_TEMPLATE
+            template=constants.PITCH_PARAGRAPH_TEMPLATE
             )
-    #    prompt_query = second_paragraph_prompt.format(person=self.person, topic=self.topic)
-       second_paragraph_chain = LLMChain(llm=self.llm, prompt=second_paragraph_prompt, output_key="pitch")
-       return second_paragraph_chain
+       pitch_paragraph_chain = LLMChain(llm=self.llm, prompt=pitch_paragraph_prompt, output_key="pitch")
+       return pitch_paragraph_chain
     
+    def ask_paragraph_chain(self):
+       """Generate the paragraph asking them to do a specific thing for/with Chi-AWE"""
+       ask_paragraph_prompt = PromptTemplate(
+            input_variables=[constants.ASK, constants.INITIATIVE],
+            template=constants.ASK_PARAGRAPH_TEMPLATE
+            )
+       ask_paragraph_chain = LLMChain(llm=self.llm, prompt=ask_paragraph_prompt, output_key="request")
+       return ask_paragraph_chain
+    
+    def secondary_ask_paragraph_chain(self):
+       """Generate the paragraph asking them to do something else for/with Chi-AWE if they couldn't do the first ask"""
+       secondary_ask_paragraph_prompt = PromptTemplate(
+            input_variables=[constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE],
+            template=constants.ALTERNATIVE_ASK_PARAGRAPH_TEMPLATE
+            )
+       secondary_ask_paragraph_chain = LLMChain(llm=self.llm, prompt=secondary_ask_paragraph_prompt, output_key="secondary-request")
+       return secondary_ask_paragraph_chain
+
     def third_paragraph_chain(self):
        """Generate the paragraph that summarizes what the org does"""
-       scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT_FILENAME)
+       scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT)
        texts = prepare_text.split_text(scraped_text=scraped_text)
-       docs = prepare_text.docsearch(texts)
-       third_paragraph_chain = prepare_text.docsearch(docs)
+       third_paragraph_chain = prepare_text.docsearch(texts, self.openai_api_key)
        return third_paragraph_chain
+    
+   #  def third_paragraph_chain(self):
+   #     """Generate the paragraph that summarizes what the org does"""
+   #     scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT)
+   #     texts = prepare_text.split_text(scraped_text=scraped_text)
+   #     third_paragraph_chain = prepare_text.docsearch(texts, self.openai_api_key)
+   #     return third_paragraph_chain
     
     def generate(self):
        opening_paragraph_chain = self.opening_paragraph_chain()
-       second_paragraph_chain = self.second_paragraph_chain()
-       third_paragraph_chain = self.third_paragraph_chain()
+       pitch_paragraph_chain = self.pitch_paragraph_chain()
+       ask_paragraph_chain = self.ask_paragraph_chain()
+       secondary_ask_paragraph_chain = self.secondary_ask_paragraph_chain()
+      #  third_paragraph_chain = self.third_paragraph_chain()
        """Chain together all of the paragraph chains"""
        overall_chain = SequentialChain(
-          chains=[opening_paragraph_chain, second_paragraph_chain, third_paragraph_chain],
-          input_variables=[constants.PERSON, constants.TOPIC],
-          output_variables=["synopsis", "pitch"],
+          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain],
+          input_variables=[constants.PERSON, constants.TOPIC, constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE],
+          output_variables=["synopsis", "pitch", "request", "secondary-request"],
           verbose=True)
-       return overall_chain({"person": self.person, "topic": self.topic})
+       return overall_chain({"person": self.person, "topic": self.topic, "ask": self.ask, "secondary-ask": self.secondary_ask, "initiative": self.initiative})

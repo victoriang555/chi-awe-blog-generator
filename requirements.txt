@@ -5,3 +5,5 @@ pypdf
 streamlit
 openai
 bs4
+unstructured
+tiktoken

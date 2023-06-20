@@ -9,6 +9,7 @@ from langchain.prompts.example_selector import LengthBasedExampleSelector
 from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.document_loaders import UnstructuredFileLoader
+from langchain.document_loaders import JSONLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
@@ -18,22 +19,31 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
 from langchain import PromptTemplate
+import json
+from pathlib import Path
+from pprint import pprint
+
+from langchain.document_loaders import TextLoader
+
 
 ########### LOAD TEXT #############
 def load_text(filepath):
-    loader = UnstructuredFileLoader(filepath)
-    data = loader.load()
-    print(data)
+    loader = TextLoader(filepath)
+
+    scraped_text = json.loads(Path(filepath).read_text())
+    # loader = UnstructuredFileLoader(filepath)
+    # data = loader.load()
+    pprint(scraped_text)
     # loader = PyPDFLoader("example_data/layout-parser-paper.pdf")
     # pages = loader.load_and_split()
 
     # Note - without a text splitter, it'll probably be too many tokens to handle.
     # print(f"Number of pages: {len(pages)}")
     # print(f"First document content: {pages[0]}")
-
-    with open(filepath) as f:
-        scraped_text = f.read()
-        return scraped_text
+    return scraped_text
+    # with open(filepath) as f:
+    #     scraped_text = f.read()
+    #     return scraped_text
 
 ########### SPLITTING THE TEXT INTO CHUNKS #########
 def split_text(scraped_text):
@@ -50,8 +60,8 @@ def split_text(scraped_text):
     return texts
 
 ########### VECTORSTORES ##############
-def docsearch(texts):
-    embeddings = OpenAIEmbeddings()
+def docsearch(texts, openai_api_key):
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     docsearch = Chroma.from_texts(texts, embeddings)
 
     query = "What did the president say about Ketanji Brown Jackson"

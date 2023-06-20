@@ -31,3 +31,6 @@ make run
 - Output Parsers - Automatically parses the output of the language model into an object. More complicated, but very useful in structuring the outputs of the LLM
 - Example Selectors - Choose which examples to put in the prompt. Goal could be to optimize for cost-savings, relevance, etc.
 - Chat Prompt Template - 
+
+# More Resources
+- Example concept tutorial for chaining https://towardsdatascience.com/a-gentle-intro-to-chaining-llms-agents-and-utils-via-langchain-16cd385fca81

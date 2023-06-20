@@ -12,6 +12,8 @@ from langchain.chains import LLMChain, ConversationChain, SimpleSequentialChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 
+########## A FILE OF EXAMPLES FOR REFERENCE. THIS SCRIPT IS NOT USED IN THE ACTUAL APP ###########
+
 template = "Tell me a {adjective} joke about {content}."
 
 # Constructor
@@ -114,7 +116,7 @@ print(f"\nFirst chunk: {texts[0]}\n")
 print(f"Second chunk: {texts[1]}\n")
 
 ########### VECTORSTORES ##############
-embeddings = OpenAIEmbeddings()
+embeddings = OpenAIEmbeddings(Embed)
 docsearch = Chroma.from_texts(texts, embeddings)
 
 query = "What did the president say about Ketanji Brown Jackson"
