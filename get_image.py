@@ -1,6 +1,6 @@
 import openai
 
-def getImage(key, topics):
+def get_image(key, topics):
     PROMPT = "The image should represent following values - " + topics + " and should be a cartoon"
     openai.api_key = key
 
