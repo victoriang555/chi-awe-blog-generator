@@ -47,6 +47,6 @@ class ScrapeChiAWE:
       response = requests.get(url)
       soup = BeautifulSoup(response.content, 'html.parser')
       scrape_class_dict[url] = soup.find_all("div", {"class": scrape_class})
-      scrape_text_dict[url] = [x.get_text() for x in scrape_class_dict[(k, url)]]
+      scrape_text_dict[url] = [x.get_text() for x in scrape_class_dict[url]]
 
     return scrape_text_dict
