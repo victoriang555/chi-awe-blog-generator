@@ -1,6 +1,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+import time
 
 
 class ScrapeChiAWE:
@@ -33,7 +34,7 @@ class ScrapeChiAWE:
       text = d['text'].strip()
       hyperlink = d['link']
       if hyperlink[0] == '/':
-        chi_awe_hyperlinks_dict[text] = self.base_url + hyperlink[1:]
+        chi_awe_hyperlinks_dict[text] = self.base_url + hyperlink
     return chi_awe_hyperlinks_dict
 
   def get_content(self, scrape_class = "sqs-html-content"):
@@ -44,6 +45,7 @@ class ScrapeChiAWE:
     scrape_text_dict = {}
 
     for k, url in chi_awe_hyperlinks_dict.items():
+      time.sleep(2)
       response = requests.get(url)
       soup = BeautifulSoup(response.content, 'html.parser')
       scrape_class_dict[url] = soup.find_all("div", {"class": scrape_class})

@@ -50,12 +50,17 @@ def scrape_particular_website(website):
     scraper = ScrapeChiAWE(website)
     scraped_text_dict = scraper.get_content_for_specific_page(website)
 
+def summarize_scraped_text(openai_api_key, filename):
+    """Generate the paragraph that summarizes what the org does"""
+    scraped_text = prepare_text.load_text(filename)
+    texts = prepare_text.split_text(scraped_text=scraped_text)
+    summary = prepare_text.docsearch(texts, openai_api_key)
     with open(constants.SCRAPED_PARTICULAR_WEBSITE, "w") as outfile:
        json.dump(scraped_text_dict, outfile)
     
-    # with open(constants.SCRAPED_TEXT,'w+') as f:
-    #     f.write(str(scraped_text_dict))
-    return st.info(scraped_text_dict)
+    with open(constants.SCRAPED_TEXT,'w+') as f:
+        f.write(str(scraped_text_dict))
+    return st.info(summary)
     
 def generate_org_summary(openai_api_key, webpage_url):
     """Generate the org summary paragraph"""
@@ -90,6 +95,7 @@ with st.form('myform'):
   org_summary_webpage = st.text_input('Provide the specific link to the page where we should pull text from to generate an org summary:', '')
   scrape_webpage = st.text_input('Provide the full url to the page that we should scrape for org content:', '')
   scrape_requested = st.form_submit_button('Scrape')
+  summary_requested = st.form_submit_button('Request Chi-AWE Summary')
   image_requested = st.form_submit_button('Generate Image')
   blog_requested = st.form_submit_button('Request Blog')
   org_summary_requested = st.form_submit_button('Request org summary')
@@ -99,6 +105,8 @@ with st.form('myform'):
     st.warning('Please enter your OpenAI API key!', icon='⚠')
   if scrape_requested:
     scrape_all_websites()
+  if summary_requested and openai_api_key.startswith('sk-'):
+     summarize_scraped_text(openai_api_key, constants.SCRAPED_JSON)
   if image_requested:
     image_topics = [topic, initiative]
     image_topics_string = ''.join(image_topics)
