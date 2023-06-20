@@ -28,11 +28,11 @@ from langchain.document_loaders import TextLoader
 
 ########### LOAD TEXT #############
 def load_text(filepath):
-    loader = TextLoader(filepath)
+    # loader = TextLoader(filepath)
 
     scraped_text = json.loads(Path(filepath).read_text())
     # loader = UnstructuredFileLoader(filepath)
-    # data = loader.load()
+    # scraped_text = loader.load()
     pprint(scraped_text)
     # loader = PyPDFLoader("example_data/layout-parser-paper.pdf")
     # pages = loader.load_and_split()
@@ -64,7 +64,7 @@ def docsearch(texts, openai_api_key):
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     docsearch = Chroma.from_texts(texts, embeddings)
 
-    query = "What did the president say about Ketanji Brown Jackson"
+    query = constants.WEBSITE_SUMMARY_QUERY
     docs = docsearch.similarity_search(query)
     return docs
 

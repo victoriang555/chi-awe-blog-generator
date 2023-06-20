@@ -3,6 +3,8 @@ import response_body_generator
 from scrape.scrape_chi_awe_org import ScrapeChiAWE
 from get_image import get_image
 
+import json
+
 import streamlit as st
 
 st.set_page_config(page_title="Chi-AWE Blog Post Generator App",
@@ -35,8 +37,8 @@ def scrape_all_websites():
         next_scrape_dict = dict(next_scrape)
         scraped_text_dict.update(next_scrape_dict)
 
-    # with open(constants.SCRAPED_JSON, "w") as outfile:
-    #    json.dump(scraped_text_dict, outfile)
+    with open(constants.SCRAPED_JSON, "w") as outfile:
+       json.dump(scraped_text_dict, outfile)
     
     with open(constants.SCRAPED_TEXT,'w+') as f:
         f.write(str(scraped_text_dict))

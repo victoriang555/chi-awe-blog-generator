@@ -88,12 +88,12 @@ class ResponseBodyGenerator:
         alternative_read_paragraph_chain = LLMChain(llm=self.llm, prompt=alternative_read_paragraph_prompt, output_key='alternative-suggested-reading')
         return alternative_read_paragraph_chain
 
-    def third_paragraph_chain(self):
+    def org_summary_paragraph_chain(self):
        """Generate the paragraph that summarizes what the org does"""
-       scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT)
+       scraped_text = prepare_text.load_text(constants.SCRAPED_JSON)
        texts = prepare_text.split_text(scraped_text=scraped_text)
-       third_paragraph_chain = prepare_text.docsearch(texts, self.openai_api_key)
-       return third_paragraph_chain
+       org_summary_paragraph_chain = prepare_text.docsearch(texts, self.openai_api_key)
+       return org_summary_paragraph_chain
     
    #  def third_paragraph_chain(self):
    #     """Generate the paragraph that summarizes what the org does"""
@@ -103,16 +103,19 @@ class ResponseBodyGenerator:
    #     return third_paragraph_chain
     
     def generate(self):
+       # Generate paragraph chains
        opening_paragraph_chain = self.opening_paragraph_chain()
        pitch_paragraph_chain = self.pitch_paragraph_chain()
        ask_paragraph_chain = self.ask_paragraph_chain()
        secondary_ask_paragraph_chain = self.secondary_ask_paragraph_chain()
        next_read_paragraph_chain = self.next_read_paragraph_chain()
        alternative_read_paragraph_chain = self.alternative_read_paragraph_chain()
+       org_summary_paragraph_chain= self.org_summary_paragraph_chain()
       #  third_paragraph_chain = self.third_paragraph_chain()
-       """Chain together all of the paragraph chains"""
+
+       #Chain together all of the paragraph chains
        overall_chain = SequentialChain(
-          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain, next_read_paragraph_chain, alternative_read_paragraph_chain],
+          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain, next_read_paragraph_chain, alternative_read_paragraph_chain, org_summary_paragraph_chain],
           input_variables=[constants.PERSON, constants.TOPIC, constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE, constants.NEXT_READ, constants.NEXT_READ_TOPICS, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_TOPICS],
           output_variables=["synopsis", "pitch", "request", "secondary-request", "next-suggested-reading", "alternative-suggested-reading"],
           verbose=True)
