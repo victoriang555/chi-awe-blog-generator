@@ -65,7 +65,8 @@ def summarize_scraped_text(openai_api_key, filename):
 def generate_org_summary(openai_api_key, webpage_url):
     """Generate the org summary paragraph"""
     # scraped_text = prepare_text.load_text(constants.SCRAPED_JSON, webpage_url)
-    scraped_text = prepare_text.load_json(constants.SCRAPED_PARTICULAR_WEBSITE, webpage_url)
+    webpage_url_cleaned = webpage_url.replace("http://", "").replace("https://", "")
+    scraped_text = prepare_text.load_json(constants.SCRAPED_PARTICULAR_WEBSITE,   webpage_url_cleaned)
     texts = prepare_text.split_text(scraped_text=scraped_text)
     docs = prepare_text.create_docs(texts)
     summarized_text = prepare_text.summarize(openai_api_key, docs)
@@ -83,17 +84,16 @@ def generate_response(openai_api_key, person, topic, ask, secondary_ask, initiat
 openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')
 
 with st.form('myform'):
-  person = st.text_input('Provide a list of adjectives/pronouns describing the demographics of the target audience, ie: age, ethnicity, gender, occupation:', '')
-  topic = st.text_input('What topic do you want to generate a blog post for? Topics include: pageantry, fashion, AAPI:', '')
-  ask = st.text_input('What is the specific thing you want to ask of the blog post reader? Asks include: donate, volunteer, sponsor:', '')
-  initiative = st.text_input('What specific chi-awe program/initiative/department are you asking the reader to support?:', '')
-  secondary_ask = st.text_input('What is the secondary thing you would want to ask of the blog post reader if they cannot commit to the first ask? ie: attend an upcoming event, sign up for the email list')
-  next_read = st.text_input('What is the next page on the website or another chi-awe website you want to redirect the reader to once they are done reading this blog post?:', '')
-  next_read_topics = st.text_input('Provide a list of the relevant topics of the next read:', '')
-  alternative_read = st.text_input('What is an alternative webpage you want to redirect the reader to?', '')
-  alternative_read_topics = st.text_input('Provide a list of the relevant topics of the alternative read:', '')
-  org_summary_webpage = st.text_input('Provide the specific link to the page where we should pull text from to generate an org summary:', '')
-  scrape_webpage = st.text_input('Provide the full url to the page that we should scrape for org content:', '')
+  person = st.text_input('Target Blog Post Reader Demographics - Provide a list of adjectives/pronouns describing the demographics of the target audience, ie: age, ethnicity, gender, occupation:', '')
+  topic = st.text_input('Blog Post Topic - What topic do you want to generate a blog post for? Topics include: pageantry, fashion, AAPI:', '')
+  ask = st.text_input('Primary Reader Ask - What is the specific thing you want to ask of the blog post reader? Asks include: donate, volunteer, sponsor:', '')
+  initiative = st.text_input('Initiative - What specific chi-awe program/initiative/department are you asking the reader to support?:', '')
+  secondary_ask = st.text_input('Secondary Reader Ask - What is the secondary thing you would want to ask of the blog post reader if they cannot commit to the first ask? ie: attend an upcoming event, sign up for the email list')
+  next_read = st.text_input('Next Suggested Reading - What is the next page on the website or another chi-awe website you want to redirect the reader to once they are done reading this blog post?:', '')
+  next_read_topics = st.text_input('Next Suggested Reading Keywords - Provide a list of the relevant topics of the next read:', '')
+  alternative_read = st.text_input('Alternative Suggested Reading - What is an alternative webpage you want to redirect the reader to?', '')
+  alternative_read_topics = st.text_input('Alternative Reading Keywords - Provide a list of the relevant topics of the alternative read:', '')
+  particular_website_to_scrape = st.text_input('Webpage to Scrape - The full url of the Chi-AWE webpage we should scrape content from')
   scrape_requested = st.form_submit_button('Scrape')
   summary_requested = st.form_submit_button('Request Chi-AWE Summary')
   image_requested = st.form_submit_button('Generate Image')
@@ -112,9 +112,9 @@ with st.form('myform'):
     image_topics_string = ''.join(image_topics)
     generate_image(openai_api_key, image_topics_string)
   if org_summary_requested:
-     generate_org_summary(openai_api_key) 
+     generate_org_summary(openai_api_key, particular_website_to_scrape) 
   if scrape_particular_webpage:
-     scrape_particular_website(scrape_webpage)
+     scrape_particular_website(particular_website_to_scrape)
   if blog_requested and openai_api_key.startswith('sk-'):
     generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics)
     # os.remove(constants.SCRAPED_TEXT_FILENAME)
