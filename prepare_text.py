@@ -72,5 +72,5 @@ def docsearch(texts, openai_api_key):
 def summarize(docs):
     llm = OpenAI(temperature=0)
     chain = load_summarize_chain(llm, chain_type="map_reduce")
-    # summarized_text = chain.run(docs)
-    return chain
+    summarized_text = chain.run(docs)
+    return summarized_text

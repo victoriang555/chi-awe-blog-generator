@@ -2,6 +2,9 @@ import constants
 import response_body_generator
 from scrape.scrape_chi_awe_org import ScrapeChiAWE
 from get_image import get_image
+import prepare_text
+
+import json
 
 import streamlit as st
 
@@ -41,6 +44,13 @@ def scrape_all_websites():
     with open(constants.SCRAPED_TEXT,'w+') as f:
         f.write(str(scraped_text_dict))
 
+def summarize_scraped_text(openai_api_key, filename):
+    """Generate the paragraph that summarizes what the org does"""
+    scraped_text = prepare_text.load_text(filename)
+    texts = prepare_text.split_text(scraped_text=scraped_text)
+    summary = prepare_text.docsearch(texts, openai_api_key)
+    return st.info(summary)
+    
 def generate_image(openai_api_key, image_topics_string):
     response = get_image(openai_api_key, image_topics_string)
     return st.info(response)
@@ -63,6 +73,7 @@ with st.form('myform'):
   alternative_read = st.text_input('What is an alternative webpage you want to redirect the reader to?', '')
   alternative_read_topics = st.text_input('Provide a list of the relevant topics of the alternative read:', '')
   scrape_requested = st.form_submit_button('Scrape')
+  summary_requested = st.form_submit_button('Request Chi-AWE Summary')
   image_requested = st.form_submit_button('Generate Image')
   blog_requested = st.form_submit_button('Request Blog')
   # Smoke test for whether the user is providing a valid OpenAi API Key
@@ -70,6 +81,8 @@ with st.form('myform'):
     st.warning('Please enter your OpenAI API key!', icon='⚠')
   if scrape_requested:
     scrape_all_websites()
+  if summary_requested and openai_api_key.startswith('sk-'):
+     summarize_scraped_text(openai_api_key, constants.SCRAPED_JSON)
   if image_requested:
     image_topics = [topic, initiative]
     image_topics_string = ''.join(image_topics)

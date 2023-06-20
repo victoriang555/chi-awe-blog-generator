@@ -87,13 +87,6 @@ class ResponseBodyGenerator:
         )
         alternative_read_paragraph_chain = LLMChain(llm=self.llm, prompt=alternative_read_paragraph_prompt, output_key='alternative-suggested-reading')
         return alternative_read_paragraph_chain
-
-    def third_paragraph_chain(self):
-       """Generate the paragraph that summarizes what the org does"""
-       scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT)
-       texts = prepare_text.split_text(scraped_text=scraped_text)
-       third_paragraph_chain = prepare_text.docsearch(texts, self.openai_api_key)
-       return third_paragraph_chain
     
    #  def third_paragraph_chain(self):
    #     """Generate the paragraph that summarizes what the org does"""
