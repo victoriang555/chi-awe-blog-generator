@@ -42,6 +42,8 @@ def scrape_all_websites():
     
     with open(constants.SCRAPED_TEXT,'w+') as f:
         f.write(str(scraped_text_dict))
+    
+    return st.info(scraped_text_dict)
 
 def generate_image(openai_api_key, image_topics_string):
     response = get_image(openai_api_key, image_topics_string)

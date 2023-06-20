@@ -27,6 +27,25 @@ from langchain.document_loaders import TextLoader
 
 
 ########### LOAD TEXT #############
+
+# Define the metadata extraction function.
+def metadata_func(record: dict, metadata: dict) -> dict:
+
+    metadata["sender_name"] = record.get("sender_name")
+    metadata["timestamp_ms"] = record.get("timestamp_ms")
+
+    return metadata
+
+
+loader = JSONLoader(
+    file_path='./example_data/facebook_chat.json',
+    jq_schema='.messages[]',
+    content_key="content",
+    metadata_func=metadata_func
+)
+
+data = loader.load()
+
 def load_text(filepath):
     # loader = TextLoader(filepath)
 
