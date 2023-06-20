@@ -32,3 +32,4 @@ ALL_CHI_AWE_WEBSITES = [CHI_AWE_WEBSITE, MISS_ASIAN_CHICAGO_WEBSITE, MISS_CHINES
 ######## FILENAMES ########
 SCRAPED_JSON = "website_text.json"
 SCRAPED_TEXT = "website_text.txt"
+SCRAPED_PARTICULAR_WEBSITE = "particular_website.json"

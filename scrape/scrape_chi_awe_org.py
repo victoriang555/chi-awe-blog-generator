@@ -47,6 +47,21 @@ class ScrapeChiAWE:
       response = requests.get(url)
       soup = BeautifulSoup(response.content, 'html.parser')
       scrape_class_dict[url] = soup.find_all("div", {"class": scrape_class})
-      scrape_text_dict[url] = [x.get_text() for x in scrape_class_dict[url]]
+      scrape_text_dict[url.replace("http://", "").replace("https://", "")] = [x.get_text() for x in scrape_class_dict[url]]
+  
+    return scrape_text_dict
+  
+  def get_content_for_specific_page(self, scrape_class = "sqs-html-content"):
+    embedded_hyperlinks_list = self.get_embedded_hyperlinks()
+    chi_awe_hyperlinks_dict = self.get_chi_awe_hyperlinks(embedded_hyperlinks_list)
+
+    scrape_class_dict = {}
+    scrape_text_dict = {}
+
+    for k, url in chi_awe_hyperlinks_dict.items():
+      response = requests.get(url)
+      soup = BeautifulSoup(response.content, 'html.parser')
+      scrape_class_dict[url] = soup.find_all("div", {"class": scrape_class})
+      scrape_text_dict[url.replace("http://", "").replace("https://", "")] = [x.get_text() for x in scrape_class_dict[url]][0]
 
     return scrape_text_dict
