@@ -1,6 +1,7 @@
 import constants
 import response_body_generator
 from scrape.scrape_chi_awe_org import ScrapeChiAWE
+from get_image import get_image
 
 import streamlit as st
 
@@ -40,6 +41,10 @@ def scrape_all_websites():
     with open(constants.SCRAPED_TEXT,'w+') as f:
         f.write(str(scraped_text_dict))
 
+def generate_image(openai_api_key, image_topics_string):
+    response = get_image(openai_api_key, image_topics_string)
+    return st.info(response)
+
 def generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics):
     generator = response_body_generator.ResponseBodyGenerator(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics)
     response = generator.generate()
@@ -58,12 +63,17 @@ with st.form('myform'):
   alternative_read = st.text_input('What is an alternative webpage you want to redirect the reader to?', '')
   alternative_read_topics = st.text_input('Provide a list of the relevant topics of the alternative read:', '')
   scrape_requested = st.form_submit_button('Scrape')
+  image_requested = st.form_submit_button('Generate Image')
   blog_requested = st.form_submit_button('Request Blog')
   # Smoke test for whether the user is providing a valid OpenAi API Key
   if not openai_api_key.startswith('sk-'):
     st.warning('Please enter your OpenAI API key!', icon='⚠')
   if scrape_requested:
     scrape_all_websites()
+  if image_requested:
+    image_topics = [topic, initiative]
+    image_topics_string = ''.join(image_topics)
+    generate_image(openai_api_key, image_topics_string) 
   if blog_requested and openai_api_key.startswith('sk-'):
     generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics)
     # os.remove(constants.SCRAPED_TEXT_FILENAME)
