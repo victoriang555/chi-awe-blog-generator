@@ -21,13 +21,17 @@ from langchain import PromptTemplate
 import streamlit as st
 
 class ResponseBodyGenerator:
-    def __init__(self, openai_api_key, person, topic, ask, secondary_ask, initiative): 
+    def __init__(self, openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics):
         self.openai_api_key = openai_api_key
         self.person = person
         self.topic = topic
         self.ask = ask
         self.secondary_ask = secondary_ask
         self.initiative = initiative
+        self.next_read = next_read
+        self.next_read_topics = next_read_topics
+        self.alternative_read = alternative_read
+        self.alternative_read_topics = alternative_read_topics
         self.llm = OpenAI(model_name=constants.MODEL_NAME, openai_api_key=openai_api_key)
     
     def opening_paragraph_chain(self):
@@ -66,6 +70,24 @@ class ResponseBodyGenerator:
        secondary_ask_paragraph_chain = LLMChain(llm=self.llm, prompt=secondary_ask_paragraph_prompt, output_key="secondary-request")
        return secondary_ask_paragraph_chain
 
+    def next_read_paragraph_chain(self):
+       """Generate a paragraph suggesting that they read another page on the website"""
+       next_read_paragraph_prompt = PromptTemplate(
+          input_variables = [constants.TOPIC, constants.NEXT_READ, constants.NEXT_READ_TOPICS],
+          template=constants.NEXT_READ_PARAGRAPH_TEMPLATE
+       )
+       next_read_paragraph_chain = LLMChain(llm=self.llm, prompt=next_read_paragraph_prompt, output_key='next-suggested-reading')
+       return next_read_paragraph_chain
+
+    def alternative_read_paragraph_chain(self):
+        """Generate a paragraph suggesting the reader read an alternative page on the website"""
+        alternative_read_paragraph_prompt = PromptTemplate(
+            input_variables = [constants.TOPIC, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_TOPICS],
+            template=constants.ALTERNATIVE_READ_PARAGRAPH_TEMPLATE
+        )
+        alternative_read_paragraph_chain = LLMChain(llm=self.llm, prompt=alternative_read_paragraph_prompt, output_key='alternative-suggested-reading')
+        return alternative_read_paragraph_chain
+
     def third_paragraph_chain(self):
        """Generate the paragraph that summarizes what the org does"""
        scraped_text = prepare_text.load_text(constants.SCRAPED_TEXT)
@@ -85,11 +107,13 @@ class ResponseBodyGenerator:
        pitch_paragraph_chain = self.pitch_paragraph_chain()
        ask_paragraph_chain = self.ask_paragraph_chain()
        secondary_ask_paragraph_chain = self.secondary_ask_paragraph_chain()
+       next_read_paragraph_chain = self.next_read_paragraph_chain()
+       alternative_read_paragraph_chain = self.alternative_read_paragraph_chain()
       #  third_paragraph_chain = self.third_paragraph_chain()
        """Chain together all of the paragraph chains"""
        overall_chain = SequentialChain(
-          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain],
-          input_variables=[constants.PERSON, constants.TOPIC, constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE],
-          output_variables=["synopsis", "pitch", "request", "secondary-request"],
+          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain, next_read_paragraph_chain, alternative_read_paragraph_chain],
+          input_variables=[constants.PERSON, constants.TOPIC, constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE, constants.NEXT_READ, constants.NEXT_READ_TOPICS, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_TOPICS],
+          output_variables=["synopsis", "pitch", "request", "secondary-request", "next-suggested-reading", "alternative-suggested-reading"],
           verbose=True)
-       return overall_chain({"person": self.person, "topic": self.topic, "ask": self.ask, "secondary-ask": self.secondary_ask, "initiative": self.initiative})
+       return overall_chain({"person": self.person, "topic": self.topic, "ask": self.ask, "secondary-ask": self.secondary_ask, "initiative": self.initiative, "next-read": self.next_read, "next-read-topics": self.next_read_topics, "alternative-read": self.alternative_read, "alternative-read-topics": self.alternative_read_topics})

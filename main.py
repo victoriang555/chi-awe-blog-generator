@@ -11,7 +11,7 @@ st.set_page_config(page_title="Chi-AWE Blog Post Generator App",
                    menu_items={
                       'Get Help': 'https://www.chi-awe.org/contact',
                       'Report a bug': 'https://www.chi-awe.org/contact',
-                      'About': 'AI Hackathon project for Chi-AWE org'
+                      'About': 'AI Hackathon project for Chi-AWE org. Source code here: https://github.com/victoriang555/chi-awe-blog-generator',
                    })
 """
 Setup the Streamlit app
@@ -40,8 +40,8 @@ def scrape_all_websites():
     with open(constants.SCRAPED_TEXT,'w+') as f:
         f.write(str(scraped_text_dict))
 
-def generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative):
-    generator = response_body_generator.ResponseBodyGenerator(openai_api_key, person, topic, ask, secondary_ask, initiative)
+def generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics):
+    generator = response_body_generator.ResponseBodyGenerator(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics)
     response = generator.generate()
     return st.info(response)
 
@@ -53,6 +53,10 @@ with st.form('myform'):
   ask = st.text_input('What is the specific thing you want to ask of the blog post reader? Asks include: donate, volunteer, sponsor:', '')
   initiative = st.text_input('What specific chi-awe program/initiative/department are you asking the reader to support?:', '')
   secondary_ask = st.text_input('What is the secondary thing you would want to ask of the blog post reader if they cannot commit to the first ask? ie: attend an upcoming event, sign up for the email list')
+  next_read = st.text_input('What is the next page on the website or another chi-awe website you want to redirect the reader to once they are done reading this blog post?:', '')
+  next_read_topics = st.text_input('Provide a list of the relevant topics of the next read:', '')
+  alternative_read = st.text_input('What is an alternative webpage you want to redirect the reader to?', '')
+  alternative_read_topics = st.text_input('Provide a list of the relevant topics of the alternative read:', '')
   scrape_requested = st.form_submit_button('Scrape')
   blog_requested = st.form_submit_button('Request Blog')
   # Smoke test for whether the user is providing a valid OpenAi API Key
@@ -61,7 +65,7 @@ with st.form('myform'):
   if scrape_requested:
     scrape_all_websites()
   if blog_requested and openai_api_key.startswith('sk-'):
-    generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative)
+    generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics)
     # os.remove(constants.SCRAPED_TEXT_FILENAME)
 
 if __name__ == '__main__':
