@@ -38,18 +38,38 @@ def scrape_all_websites():
         next_scrape_dict = dict(next_scrape)
         scraped_text_dict.update(next_scrape_dict)
 
-    # with open(constants.SCRAPED_JSON, "w") as outfile:
-    #    json.dump(scraped_text_dict, outfile)
+    with open(constants.SCRAPED_JSON, "w") as outfile:
+       json.dump(scraped_text_dict, outfile)
     
     with open(constants.SCRAPED_TEXT,'w+') as f:
         f.write(str(scraped_text_dict))
+    
+    return st.info(scraped_text_dict)
+
+def scrape_particular_website(website):
+    scraper = ScrapeChiAWE(website)
+    scraped_text_dict = scraper.get_content_for_specific_page(website)
 
 def summarize_scraped_text(openai_api_key, filename):
     """Generate the paragraph that summarizes what the org does"""
     scraped_text = prepare_text.load_text(filename)
     texts = prepare_text.split_text(scraped_text=scraped_text)
     summary = prepare_text.docsearch(texts, openai_api_key)
+    with open(constants.SCRAPED_PARTICULAR_WEBSITE, "w") as outfile:
+       json.dump(scraped_text_dict, outfile)
+    
+    with open(constants.SCRAPED_TEXT,'w+') as f:
+        f.write(str(scraped_text_dict))
     return st.info(summary)
+    
+def generate_org_summary(openai_api_key, webpage_url):
+    """Generate the org summary paragraph"""
+    # scraped_text = prepare_text.load_text(constants.SCRAPED_JSON, webpage_url)
+    scraped_text = prepare_text.load_json(constants.SCRAPED_PARTICULAR_WEBSITE, webpage_url)
+    texts = prepare_text.split_text(scraped_text=scraped_text)
+    docs = prepare_text.create_docs(texts)
+    summarized_text = prepare_text.summarize(openai_api_key, docs)
+    return st.info(summarized_text)
     
 def generate_image(openai_api_key, image_topics_string):
     response = get_image(openai_api_key, image_topics_string)
@@ -72,10 +92,14 @@ with st.form('myform'):
   next_read_topics = st.text_input('Provide a list of the relevant topics of the next read:', '')
   alternative_read = st.text_input('What is an alternative webpage you want to redirect the reader to?', '')
   alternative_read_topics = st.text_input('Provide a list of the relevant topics of the alternative read:', '')
+  org_summary_webpage = st.text_input('Provide the specific link to the page where we should pull text from to generate an org summary:', '')
+  scrape_webpage = st.text_input('Provide the full url to the page that we should scrape for org content:', '')
   scrape_requested = st.form_submit_button('Scrape')
   summary_requested = st.form_submit_button('Request Chi-AWE Summary')
   image_requested = st.form_submit_button('Generate Image')
   blog_requested = st.form_submit_button('Request Blog')
+  org_summary_requested = st.form_submit_button('Request org summary')
+  scrape_particular_webpage = st.form_submit_button("Scrape particular webpage")
   # Smoke test for whether the user is providing a valid OpenAi API Key
   if not openai_api_key.startswith('sk-'):
     st.warning('Please enter your OpenAI API key!', icon='⚠')
@@ -86,7 +110,11 @@ with st.form('myform'):
   if image_requested:
     image_topics = [topic, initiative]
     image_topics_string = ''.join(image_topics)
-    generate_image(openai_api_key, image_topics_string) 
+    generate_image(openai_api_key, image_topics_string)
+  if org_summary_requested:
+     generate_org_summary(openai_api_key) 
+  if scrape_particular_webpage:
+     scrape_particular_website(scrape_webpage)
   if blog_requested and openai_api_key.startswith('sk-'):
     generate_response(openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics)
     # os.remove(constants.SCRAPED_TEXT_FILENAME)

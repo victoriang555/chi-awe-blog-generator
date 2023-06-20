@@ -22,17 +22,47 @@ from langchain import PromptTemplate
 import json
 from pathlib import Path
 from pprint import pprint
+from langchain.docstore.document import Document
+from langchain.document_loaders import JSONLoader
+
 
 from langchain.document_loaders import TextLoader
 
 
 ########### LOAD TEXT #############
-def load_text(filepath):
-    loader = TextLoader(filepath)
+
+# # Define the metadata extraction function.
+# def metadata_func(record: dict, metadata: dict) -> dict:
+
+#     metadata["sender_name"] = record.get("sender_name")
+#     metadata["timestamp_ms"] = record.get("timestamp_ms")
+
+#     return metadata
+
+
+# loader = JSONLoader(
+#     file_path='./example_data/facebook_chat.json',
+#     jq_schema='.messages[]',
+#     content_key="content",
+#     metadata_func=metadata_func
+# )
+
+# data = loader.load()
+def load_json(filepath, webpage_url):
+    loader = JSONLoader(
+        file_path=filepath,
+        jq_schema="\"" + webpage_url + "\"")
+
+    scraped_text = loader.load()
+    return scraped_text
+
+def load_text(filepath, webpage_url):
+    # loader = TextLoader(filepath)
 
     scraped_text = json.loads(Path(filepath).read_text())
     # loader = UnstructuredFileLoader(filepath)
-    # data = loader.load()
+    # scraped_text = loader.load()
+    scraped_text.get(webpage_url)
     pprint(scraped_text)
     # loader = PyPDFLoader("example_data/layout-parser-paper.pdf")
     # pages = loader.load_and_split()
@@ -51,26 +81,24 @@ def split_text(scraped_text):
         chunk_size=100,
         chunk_overlap=20
     )
+    texts = text_splitter.split_text(scraped_text)
 
-    texts = text_splitter.create_documents(scraped_text)
+    # texts = text_splitter.create_documents(scraped_text)
 
     print(f"\nFirst chunk: {texts[0]}\n")
     print(f"Second chunk: {texts[1]}\n")
 
     return texts
 
-########### VECTORSTORES ##############
-def docsearch(texts, openai_api_key):
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    docsearch = Chroma.from_texts(texts, embeddings)
-
-    query = "What did the president say about Ketanji Brown Jackson"
-    docs = docsearch.similarity_search(query)
+########### CREATE DOCS #########
+# Create Document objects for the texts (max 3 pages)
+def create_docs(texts):
+    docs = [Document(page_content=t) for t in texts[:3]]
     return docs
 
 ########### SUMMARIZE ################
-def summarize(docs):
-    llm = OpenAI(temperature=0)
+def summarize(openai_api_key, docs):
+    llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
     chain = load_summarize_chain(llm, chain_type="map_reduce")
     summarized_text = chain.run(docs)
     return summarized_text
