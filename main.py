@@ -38,6 +38,8 @@ def scrape_all_websites():
         next_scrape_dict = dict(next_scrape)
         scraped_text_dict.update(next_scrape_dict)
 
+    print(scraped_text_dict)
+
     with open(constants.SCRAPED_JSON, "w") as outfile:
        json.dump(scraped_text_dict, outfile)
     
@@ -49,17 +51,17 @@ def scrape_all_websites():
 def scrape_particular_website(website):
     scraper = ScrapeChiAWE(website)
     scraped_text_dict = scraper.get_content_for_specific_page(website)
+    
+    with open(constants.SCRAPED_PARTICULAR_WEBSITE, "w") as outfile:
+       json.dump(scraped_text_dict, outfile)
+    return st.info(scraped_text_dict)
 
 def summarize_scraped_text(openai_api_key, filename):
     """Generate the paragraph that summarizes what the org does"""
     scraped_text = prepare_text.load_text(filename)
     texts = prepare_text.split_text(scraped_text=scraped_text)
     summary = prepare_text.docsearch(texts, openai_api_key)
-    with open(constants.SCRAPED_PARTICULAR_WEBSITE, "w") as outfile:
-       json.dump(scraped_text_dict, outfile)
-    
-    with open(constants.SCRAPED_TEXT,'w+') as f:
-        f.write(str(scraped_text_dict))
+
     return st.info(summary)
     
 def generate_org_summary(openai_api_key, webpage_url):

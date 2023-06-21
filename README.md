@@ -7,6 +7,7 @@ A AI hackathon project to generate blog posts for the Chicago Asian Women Empowe
 2. Navigate to this website where the app is hosted: https://victoriang555-chi-awe-blog-generator-main-cntmyp.streamlit.app/
 3. Copy your API key into the field in the left nav
 4. Enter all of the requested fields.
+5. Click the button for the requested action, one at a time. Make sure to wait until the "running" icon at the top right of the page is no longer there and the content you requested is showing on the screen.
 
 ## Use case 1: Scrape all Chi-AWE Websites for content
 If the Chi-AWE websites have been updated since the last time you used this app, you should scrape again. This will ensure that the app is using the most up-to-date content. The app will respond with the content is scraped in a json format, with the keys being the specific page's url and the value being the text it was able to scrape. You can use this content as guidance for determining how SEO-friendly each of your pages are and see what content you might be missing! Also consider how many times a particular search term shows up in the scraped content- if you want that search term to be more relevant to search engines, identify the webpages that are missing that search term and add it! 
