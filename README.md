@@ -77,3 +77,19 @@ make run
 
 # More Resources
 - Example concept tutorial for chaining https://towardsdatascience.com/a-gentle-intro-to-chaining-llms-agents-and-utils-via-langchain-16cd385fca81
+
+# Sample Input
+- 30 years old, Asian American, Female, Software Engineer
+- Pageantry
+- Donate
+- Miss Asian Chicago 2023 Community and Heritage Pageant
+- Sign up for our Dance workshop on July 10th, 2023
+- https://chi-awe.org/dancing
+- ```#home, #details, #faqs```
+- https://chi-awe.org/community-impact
+- ```#home, #page-2, #page-3, #page-4```
+- beautiful
+- pencil sketch
+- Asian-American
+- Women
+- Protesting

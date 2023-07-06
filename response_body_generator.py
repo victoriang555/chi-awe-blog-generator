@@ -18,10 +18,9 @@ from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
 from langchain import PromptTemplate
 
-import streamlit as st
 
 class ResponseBodyGenerator:
-    def __init__(self, openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, next_read_topics, alternative_read, alternative_read_topics):
+    def __init__(self, openai_api_key, person, topic, ask, secondary_ask, initiative, next_read, alternative_read, org_summary, next_read_summary, alternative_read_summary):
         self.openai_api_key = openai_api_key
         self.person = person
         self.topic = topic
@@ -29,9 +28,11 @@ class ResponseBodyGenerator:
         self.secondary_ask = secondary_ask
         self.initiative = initiative
         self.next_read = next_read
-        self.next_read_topics = next_read_topics
         self.alternative_read = alternative_read
-        self.alternative_read_topics = alternative_read_topics
+        self.org_summary = org_summary
+        self.next_read_summary = next_read_summary
+        self.alternative_read_summary = alternative_read_summary
+
         self.llm = OpenAI(model_name=constants.MODEL_NAME, openai_api_key=openai_api_key)
     
     def opening_paragraph_chain(self):
@@ -46,7 +47,7 @@ class ResponseBodyGenerator:
     def pitch_paragraph_chain(self):
        """Generate the paragraph making a pitch about supporting non-profits"""
        pitch_paragraph_prompt = PromptTemplate(
-            input_variables=[constants.PERSON, constants.TOPIC],
+            input_variables=[constants.PERSON, constants.TOPIC, constants.ORG_SUMMARY],
             template=constants.PITCH_PARAGRAPH_TEMPLATE
             )
        pitch_paragraph_chain = LLMChain(llm=self.llm, prompt=pitch_paragraph_prompt, output_key="pitch")
@@ -55,7 +56,7 @@ class ResponseBodyGenerator:
     def ask_paragraph_chain(self):
        """Generate the paragraph asking them to do a specific thing for/with Chi-AWE"""
        ask_paragraph_prompt = PromptTemplate(
-            input_variables=[constants.ASK, constants.INITIATIVE],
+            input_variables=[constants.ASK, constants.INITIATIVE, constants.ORG_SUMMARY],
             template=constants.ASK_PARAGRAPH_TEMPLATE
             )
        ask_paragraph_chain = LLMChain(llm=self.llm, prompt=ask_paragraph_prompt, output_key="request")
@@ -73,7 +74,7 @@ class ResponseBodyGenerator:
     def next_read_paragraph_chain(self):
        """Generate a paragraph suggesting that they read another page on the website"""
        next_read_paragraph_prompt = PromptTemplate(
-          input_variables = [constants.TOPIC, constants.NEXT_READ, constants.NEXT_READ_TOPICS],
+          input_variables = [constants.TOPIC, constants.NEXT_READ, constants.NEXT_READ_SUMMARY],
           template=constants.NEXT_READ_PARAGRAPH_TEMPLATE
        )
        next_read_paragraph_chain = LLMChain(llm=self.llm, prompt=next_read_paragraph_prompt, output_key='next-suggested-reading')
@@ -82,12 +83,12 @@ class ResponseBodyGenerator:
     def alternative_read_paragraph_chain(self):
         """Generate a paragraph suggesting the reader read an alternative page on the website"""
         alternative_read_paragraph_prompt = PromptTemplate(
-            input_variables = [constants.TOPIC, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_TOPICS],
+            input_variables = [constants.TOPIC, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_SUMMARY],
             template=constants.ALTERNATIVE_READ_PARAGRAPH_TEMPLATE
         )
         alternative_read_paragraph_chain = LLMChain(llm=self.llm, prompt=alternative_read_paragraph_prompt, output_key='alternative-suggested-reading')
         return alternative_read_paragraph_chain
-    
+
     def generate(self):
        # Generate paragraph chains
        opening_paragraph_chain = self.opening_paragraph_chain()
@@ -96,13 +97,13 @@ class ResponseBodyGenerator:
        secondary_ask_paragraph_chain = self.secondary_ask_paragraph_chain()
        next_read_paragraph_chain = self.next_read_paragraph_chain()
        alternative_read_paragraph_chain = self.alternative_read_paragraph_chain()
-       org_summary_paragraph_chain= self.org_summary_paragraph_chain()
+      #  org_summary_paragraph_chain= self.org_summary_paragraph_chain()
       #  third_paragraph_chain = self.third_paragraph_chain()
 
        #Chain together all of the paragraph chains
        overall_chain = SequentialChain(
-          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain, next_read_paragraph_chain, alternative_read_paragraph_chain, org_summary_paragraph_chain],
-          input_variables=[constants.PERSON, constants.TOPIC, constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE, constants.NEXT_READ, constants.NEXT_READ_TOPICS, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_TOPICS],
+          chains=[opening_paragraph_chain, pitch_paragraph_chain, ask_paragraph_chain, secondary_ask_paragraph_chain, next_read_paragraph_chain, alternative_read_paragraph_chain],
+          input_variables=[constants.PERSON, constants.TOPIC, constants.ASK, constants.SECONDARY_ASK, constants.INITIATIVE, constants.NEXT_READ, constants.NEXT_READ_SUMMARY, constants.ALTERNATIVE_READ, constants.ALTERNATIVE_READ_SUMMARY, constants.ORG_SUMMARY],
           output_variables=["synopsis", "pitch", "request", "secondary-request", "next-suggested-reading", "alternative-suggested-reading"],
           verbose=True)
-       return overall_chain({"person": self.person, "topic": self.topic, "ask": self.ask, "secondary-ask": self.secondary_ask, "initiative": self.initiative, "next-read": self.next_read, "next-read-topics": self.next_read_topics, "alternative-read": self.alternative_read, "alternative-read-topics": self.alternative_read_topics})
+       return overall_chain({"person": self.person, "topic": self.topic, "ask": self.ask, "secondary-ask": self.secondary_ask, "initiative": self.initiative, "next-read": self.next_read, "next-read-summary": self.next_read_summary, "alternative-read": self.alternative_read, "alternative-read-summary": self.alternative_read_summary, "org-summary": self.org_summary})
