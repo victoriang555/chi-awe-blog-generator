@@ -21,8 +21,10 @@ def get_image(key, adj_of_image_type, type_of_image, adj_of_objects, objects_in_
     '''
     PROMPT = "A " + adj_of_image_type + type_of_image + "of" + adj_of_objects +  objects_in_image + verb_of_objects
 
-    response = client.images.generate(prompt=PROMPT,
-    n=1,
-    size="256x256")
+    response = client.images.generate(
+        prompt=PROMPT,
+        n=1,
+        size="256x256"
+    )
     print(response.data[0].url);
     return response.data[0].url
