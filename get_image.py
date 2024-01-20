@@ -1,4 +1,6 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=key)
 
 ###### Below are some of the iterations of the prompt before we figured out the best way to phrase the prompt #######
 
@@ -18,12 +20,12 @@ def get_image(key, adj_of_image_type, type_of_image, adj_of_objects, objects_in_
     output - Image URL 
     '''
     PROMPT = "A " + adj_of_image_type + type_of_image + "of" + adj_of_objects +  objects_in_image + verb_of_objects
-    openai.api_key = key
 
-    response = openai.Image.create(
+    response = client.images.generate(
         prompt=PROMPT,
         n=1,
-        size="256x256", #can be changed to 512x512, 1024x1024
+        size="1024x1024", #1024x1024 creates the best image, size can be always be adjusted again later to best suit the design element. 
+        model="dall-e-3"
     )
-    print(response["data"][0]["url"]);
-    return response["data"][0]["url"]
+    print(response.data[0].url);
+    return response.data[0].url
